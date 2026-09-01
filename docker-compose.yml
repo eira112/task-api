@@ -5,8 +5,6 @@ services:
       POSTGRES_DB: task_api
       POSTGRES_USER: anushka
       POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
   task-api:
     build: .
     depends_on: 
