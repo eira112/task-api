@@ -8,10 +8,10 @@ pipeline {
                 sh 'docker compose exec -T task-api python -m pytest'
             }
         }
-        post{
-            always{
-                sh 'docker compose down --rmi local'
-            }
+    }
+    post{
+        always{
+            sh 'docker compose down --rmi local'
         }
     }
 }
