@@ -11,7 +11,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'docker compose up -d --build'
-                sh 'docker compose exec -T task-api python create-tables.py'
+                sh 'docker compose exec -T task-api python create_tables.py'
                 sh 'docker compose exec -T task-api python -m pytest'
             }
         }
