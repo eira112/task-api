@@ -5,9 +5,16 @@ services:
       POSTGRES_DB: task_api
       POSTGRES_USER: anushka
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anushka  -d task_api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   task-api:
     build: .
     depends_on: 
-      - postgres
+      postgres:
+        condition: service_healthy
+
     environment:
       - DATABASE_URL=postgresql+psycopg://anushka:password@postgres:5432/task_api
