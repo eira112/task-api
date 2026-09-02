@@ -18,3 +18,11 @@ services:
 
     environment:
       - DATABASE_URL=postgresql+psycopg://anushka:password@postgres:5432/task_api
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: 
+      context: ./frontend
+    ports:
+      - "5500:80"
