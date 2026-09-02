@@ -32,6 +32,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '/opt/homebrew/bin/kubectl config use-context kind-learning'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s/secret.yaml'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s/postgres.yaml'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s/task-api.yaml'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s/frontend.yaml'
+                sh '/opt/homebrew/bin/kubectl apply -f k8s/ingress.yaml'
+                sh '/opt/homebrew/bin/kubectl rollout status deployment/task-api'
+                sh '/opt/homebrew/bin/kubectl rollout status deployment/task-frontend'
+            }
+        }
     }
 
     post {
