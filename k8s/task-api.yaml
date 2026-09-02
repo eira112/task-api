@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-api
+  template:
+    metadata:
+      labels:
+        app: task-api
+    spec:
+      containers:
+        - name: task-api
+          image: cyrielle123/task-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: postgresql+psycopg://anushka:password@postgres:5432/task_api
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-api
+spec:
+  selector:
+    app: task-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
