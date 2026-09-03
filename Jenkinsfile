@@ -30,7 +30,6 @@ pipeline {
                     usernameVariable: 'DOCKER_USERNAME',
                     passwordVariable: 'DOCKER_PASSWORD'
                 )]) {
-
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                         docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
@@ -44,7 +43,20 @@ pipeline {
 
                 sh '/opt/homebrew/bin/kubectl config use-context kind-learning'
 
-                sh '/opt/homebrew/bin/kubectl apply -f k8s/secret.yaml'
+                withCredentials([usernamePassword(
+                    credentialsId: 'postgres-db-creds',
+                    usernameVariable: 'DB_USERNAME',
+                    passwordVariable: 'DB_PASSWORD'
+                )]) {
+                    sh '''
+                        /opt/homebrew/bin/kubectl create secret generic postgres-secret \
+                          --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
+                          --from-literal=DATABASE_URL="postgresql+psycopg://$DB_USERNAME:$DB_PASSWORD@postgres:5432/task_api" \
+                          --dry-run=client \
+                          -o yaml | /opt/homebrew/bin/kubectl apply -f -
+                    '''
+                }
+
                 sh '/opt/homebrew/bin/kubectl apply -f k8s/postgres.yaml'
 
                 sh '/opt/homebrew/bin/kubectl set image deployment/task-api task-api=${DOCKER_IMAGE}:${IMAGE_TAG}'
