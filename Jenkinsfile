@@ -2,6 +2,11 @@ pipeline {
 
     agent any
 
+    environment {
+        DOCKER_IMAGE = "cyrielle123/task-api"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
     stages {
 
         stage('Test') {
@@ -14,7 +19,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'docker build -t cyrielle123/task-api:latest .'
+                sh 'docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .'
             }
         }
 
@@ -25,9 +30,10 @@ pipeline {
                     usernameVariable: 'DOCKER_USERNAME',
                     passwordVariable: 'DOCKER_PASSWORD'
                 )]) {
+
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push cyrielle123/task-api:latest
+                        docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -35,12 +41,17 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
+
                 sh '/opt/homebrew/bin/kubectl config use-context kind-learning'
+
                 sh '/opt/homebrew/bin/kubectl apply -f k8s/secret.yaml'
                 sh '/opt/homebrew/bin/kubectl apply -f k8s/postgres.yaml'
-                sh '/opt/homebrew/bin/kubectl apply -f k8s/task-api.yaml'
+
+                sh '/opt/homebrew/bin/kubectl set image deployment/task-api task-api=${DOCKER_IMAGE}:${IMAGE_TAG}'
+
                 sh '/opt/homebrew/bin/kubectl apply -f k8s/frontend.yaml'
                 sh '/opt/homebrew/bin/kubectl apply -f k8s/ingress.yaml'
+
                 sh '/opt/homebrew/bin/kubectl rollout status deployment/task-api'
                 sh '/opt/homebrew/bin/kubectl rollout status deployment/task-frontend'
             }

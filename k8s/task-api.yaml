@@ -15,11 +15,24 @@ spec:
       containers:
         - name: task-api
           image: cyrielle123/task-api:latest
+
           ports:
             - containerPort: 8000
+
           env:
             - name: DATABASE_URL
-              value: postgresql+psycopg://anushka:password@postgres:5432/task_api
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DATABASE_URL
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
 
 ---
 apiVersion: v1
