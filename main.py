@@ -3,6 +3,7 @@ from routes.task_routes import router as task_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5500"],
@@ -10,9 +11,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(task_router)
-
-
 @app.get("/")
-def home():
-    return {"message": "task api is running"}
+def root():
+    return {"message": "Task API is running"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+app.include_router(task_router)
